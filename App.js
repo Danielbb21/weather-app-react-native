@@ -1,67 +1,96 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
+import WeatherInfo from './components/WeatherInfo';
+import UnitsPicker from './components/UnitsPicker';
+import { colors } from './utils';
+import ReloadIcon from './components/ReloadIcon';
 
 const WEATHER_API_KEY = '6361906f73dbe8da371a0150acc8205b';
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [currentWeather, setCurrentWheater] = useState(null);
-  useEffect(() =>{
-    load()
-  } ,[]);
-  
-  async function load(){
-    try{
+  const [unitsSystem, setUnitsSystem] = useState('metric');
+  useEffect(() => {
+
+    load();
+  }, [unitsSystem]);
+
+  async function load() {
+    setCurrentWheater(null);
+    setErrorMessage(null);
+    console.log('aqui');
+    try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       console.log(status);
-      if(status !== 'granted'){
-        
+
+      if (status !== 'granted') {
+
         setErrorMessage('Acess to location is needed to run the app')
         return;
       }
-      let latitude, longitude;
-      // const location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High})
-      // 
-      
-      const weather_url = `https://api.openweathermap.org/data/2.5/weather?lat=${12.972159}&lon=${39.2674077}&appid=${WEATHER_API_KEY}`;
-      
+
+      const location = await Location.getCurrentPositionAsync();
+      console.log(location);
+      const { latitude, longitude } = location.coords;
+
+
+      const weather_url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`;
+
       const response = await fetch(weather_url);
-                
-                const data = await response.json();
-                console.log('dsata', data);
-                if(response.ok){
-                  setCurrentWheater(data);
-                }
-                else{
-                  setErrorMessage(data.message);
-                }
-    
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCurrentWheater(data);
+      }
+      else {
+        setErrorMessage(data.message);
+      }
+
     }
-    catch(err){
+    catch (err) {
+      setErrorMessage(err.message);
       console.log(err.message);
     }
-    
+
   }
-  if(currentWeather){
-    const {main: {temp}} = currentWeather;
-    console.log('TEMP', temp);
-   return (
+  if (currentWeather) {
+    
+    
+    return (
       <View style={styles.container}>
-        <Text> aqui: {temp}</Text>
-  
+        <StatusBar style="auto" />
+
+        <View style = {styles.main}>
+        <ReloadIcon  load = {load}/>
+        <UnitsPicker unitsSystem = {unitsSystem} setUnitsSystem = {setUnitsSystem}/>
+        <WeatherInfo currentWeather={currentWeather}/>
+        
+        </View>
+
+        
+      </View>
+    );
+  }
+  else if(errorMessage){
+
+    return (
+      <View style={styles.container}>
+      
+        <Text> error: {errorMessage}</Text>
+
         <StatusBar style="auto" />
       </View>
     );
   }
   else{
-    
-   return  (
+    return (
       <View style={styles.container}>
-        
-        <Text> error: {errorMessage}</Text>
-  
+        <ActivityIndicator  size ="large" color = {colors.PRIMARY_COLOR}/>
+
         <StatusBar style="auto" />
       </View>
     );
@@ -71,9 +100,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'red',
-    // backgroundColor: '#faf',
-    alignItems: 'center',
+
     justifyContent: 'center',
   },
+  main:{
+    justifyContent: 'center',
+    flex: 1
+  },
+  
 });
