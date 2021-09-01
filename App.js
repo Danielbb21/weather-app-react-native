@@ -104,6 +104,7 @@ export default function App() {
               iconName = focused
                 ? 'home'
                 : 'home';
+                
             } else if (route.name === 'Search') {
               iconName = focused ? 'search' : 'search';
             }
