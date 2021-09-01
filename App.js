@@ -13,6 +13,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SearchWeather from './Pages/SearchWeather';
+import Home from './Pages/Home';
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -65,25 +66,32 @@ export default function App() {
 
   }
   if (currentWeather) {
-    const HomePage = () => (
-      <View style={styles.container}>
-      <StatusBar style="auto" />
+    const HomePage = ({ route, navigation }) => {
+      if (route.params) {
+        const { latitude, longitude } = route.params;
+        console.log('Latitude', latitude);
+        console.log('Longitude', longitude);
+      }
+      return (
+        <View style={styles.container}>
+          <StatusBar style="auto" />
 
-      <View style={styles.main}>
-        <ReloadIcon load={load} />
-        <UnitsPicker unitsSystem={unitsSystem} setUnitsSystem={setUnitsSystem} />
-        <WeatherInfo currentWeather={currentWeather} />
-      </View>
-      <WeatherDetails currentWheater={currentWeather} unitsSystem={unitsSystem} />
+          <View style={styles.main}>
+            <ReloadIcon load={load} />
+            <UnitsPicker unitsSystem={unitsSystem} setUnitsSystem={setUnitsSystem} />
+            <WeatherInfo currentWeather={currentWeather} />
+          </View>
+          <WeatherDetails currentWheater={currentWeather} unitsSystem={unitsSystem} />
 
 
-    </View>
-      
-    )
+        </View>
+
+      )
+    }
     const Stack = createNativeStackNavigator();
-      const Tab = createBottomTabNavigator();
+    const Tab = createBottomTabNavigator();
     return (
-      <NavigationContainer>
+      <NavigationContainer >
         {/* <View style={styles.container}>
           <StatusBar style="auto" />
 
@@ -96,7 +104,7 @@ export default function App() {
 
 
         </View> */}
-          <Tab.Navigator  screenOptions={({ route }) => ({
+        <Tab.Navigator screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
@@ -104,7 +112,7 @@ export default function App() {
               iconName = focused
                 ? 'home'
                 : 'home';
-                
+
             } else if (route.name === 'Search') {
               iconName = focused ? 'search' : 'search';
             }
@@ -115,10 +123,10 @@ export default function App() {
           tabBarActiveTintColor: 'tomato',
           tabBarInactiveTintColor: 'gray',
         })}>
-            <Tab.Screen name = "Home" component = {HomePage} />
-            <Tab.Screen name = "Search" component = {SearchWeather} />
-            
-          </Tab.Navigator>
+          <Tab.Screen name="Search" component={SearchWeather} />
+          <Tab.Screen name="Home" component={Home} />
+
+        </Tab.Navigator>
       </NavigationContainer>
     );
   }
