@@ -6,8 +6,10 @@ import WeatherInfo from './components/WeatherInfo';
 import UnitsPicker from './components/UnitsPicker';
 import { colors } from './utils';
 import ReloadIcon from './components/ReloadIcon';
+import WeatherDetails from './components/WeatherDetails';
+import {WEATHER_API_KEY} from '@env';
 
-const WEATHER_API_KEY = '6361906f73dbe8da371a0150acc8205b';
+
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -21,7 +23,7 @@ export default function App() {
   async function load() {
     setCurrentWheater(null);
     setErrorMessage(null);
-    console.log('aqui');
+    console.log('aqui123');
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       console.log(status);
@@ -32,7 +34,9 @@ export default function App() {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync();
+      const location = await Location.getCurrentPositionAsync({
+        accuracy:Location.Accuracy.High
+      });
       console.log(location);
       const { latitude, longitude } = location.coords;
 
@@ -68,8 +72,8 @@ export default function App() {
         <ReloadIcon  load = {load}/>
         <UnitsPicker unitsSystem = {unitsSystem} setUnitsSystem = {setUnitsSystem}/>
         <WeatherInfo currentWeather={currentWeather}/>
-        
         </View>
+          <WeatherDetails currentWheater = {currentWeather} unitsSystem = {unitsSystem}/>
 
         
       </View>
@@ -79,8 +83,8 @@ export default function App() {
 
     return (
       <View style={styles.container}>
-      
-        <Text> error: {errorMessage}</Text>
+      <ReloadIcon  load = {load}/>
+        <Text style = {{textAlign: 'center'}}> error: {errorMessage}</Text>
 
         <StatusBar style="auto" />
       </View>
@@ -100,7 +104,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
+    
     justifyContent: 'center',
   },
   main:{
