@@ -7,9 +7,12 @@ import UnitsPicker from './components/UnitsPicker';
 import { colors } from './utils';
 import ReloadIcon from './components/ReloadIcon';
 import WeatherDetails from './components/WeatherDetails';
-import {WEATHER_API_KEY} from '@env';
-
-
+import { WEATHER_API_KEY } from '@env';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import SearchWeather from './Pages/SearchWeather';
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -35,7 +38,7 @@ export default function App() {
       }
 
       const location = await Location.getCurrentPositionAsync({
-        accuracy:Location.Accuracy.High
+        accuracy: Location.Accuracy.High
       });
       console.log(location);
       const { latitude, longitude } = location.coords;
@@ -62,38 +65,77 @@ export default function App() {
 
   }
   if (currentWeather) {
-    
-    
+    const HomePage = () => (
+      <View style={styles.container}>
+      <StatusBar style="auto" />
+
+      <View style={styles.main}>
+        <ReloadIcon load={load} />
+        <UnitsPicker unitsSystem={unitsSystem} setUnitsSystem={setUnitsSystem} />
+        <WeatherInfo currentWeather={currentWeather} />
+      </View>
+      <WeatherDetails currentWheater={currentWeather} unitsSystem={unitsSystem} />
+
+
+    </View>
+      
+    )
+    const Stack = createNativeStackNavigator();
+      const Tab = createBottomTabNavigator();
+    return (
+      <NavigationContainer>
+        {/* <View style={styles.container}>
+          <StatusBar style="auto" />
+
+          <View style={styles.main}>
+            <ReloadIcon load={load} />
+            <UnitsPicker unitsSystem={unitsSystem} setUnitsSystem={setUnitsSystem} />
+            <WeatherInfo currentWeather={currentWeather} />
+          </View>
+          <WeatherDetails currentWheater={currentWeather} unitsSystem={unitsSystem} />
+
+
+        </View> */}
+          <Tab.Navigator  screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === 'Home') {
+              iconName = focused
+                ? 'home'
+                : 'home';
+            } else if (route.name === 'Search') {
+              iconName = focused ? 'search' : 'search';
+            }
+
+            // You can return any component that you like here!
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: 'tomato',
+          tabBarInactiveTintColor: 'gray',
+        })}>
+            <Tab.Screen name = "Home" component = {HomePage} />
+            <Tab.Screen name = "Search" component = {SearchWeather} />
+            
+          </Tab.Navigator>
+      </NavigationContainer>
+    );
+  }
+  else if (errorMessage) {
+
     return (
       <View style={styles.container}>
+        <ReloadIcon load={load} />
+        <Text style={{ textAlign: 'center' }}> error: {errorMessage}</Text>
+
         <StatusBar style="auto" />
-
-        <View style = {styles.main}>
-        <ReloadIcon  load = {load}/>
-        <UnitsPicker unitsSystem = {unitsSystem} setUnitsSystem = {setUnitsSystem}/>
-        <WeatherInfo currentWeather={currentWeather}/>
-        </View>
-          <WeatherDetails currentWheater = {currentWeather} unitsSystem = {unitsSystem}/>
-
-        
       </View>
     );
   }
-  else if(errorMessage){
-
+  else {
     return (
       <View style={styles.container}>
-      <ReloadIcon  load = {load}/>
-        <Text style = {{textAlign: 'center'}}> error: {errorMessage}</Text>
-
-        <StatusBar style="auto" />
-      </View>
-    );
-  }
-  else{
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator  size ="large" color = {colors.PRIMARY_COLOR}/>
+        <ActivityIndicator size="large" color={colors.PRIMARY_COLOR} />
 
         <StatusBar style="auto" />
       </View>
@@ -104,12 +146,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
+
     justifyContent: 'center',
   },
-  main:{
+  main: {
     justifyContent: 'center',
     flex: 1
   },
-  
+
 });
