@@ -3,24 +3,38 @@ import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity } from 'rea
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Icon } from '@expo/vector-icons/build/createIconSet';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '../utils/index'
+import { colors } from '../utils/index';
+import axios from 'axios';
+const API = 'https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&';
 const { PRIMARY_COLOR } = colors;
-export default function SearchWeather({navigation}) {
-    const [enteredText, setEnteredText] = useState('');
 
+
+export default function SearchWeather({ navigation }) {
+    const [enteredText, setEnteredText] = useState('');
+    const submitApiCallHandler = () => {
+        console.log('VALUE', enteredText);
+        axios.get(`${API}q=${enteredText}`).then(response => {
+            console.log(response.data.results[0].geometry, response.data.results[0].components);
+            const {lat, lng }= response.data.results[0].geometry
+            navigation.navigate('Home', {
+               latitude: lat,
+               longitude: lng
+            })
+        }).catch(err => console.log(err.message));
+    }
     return (
         <View style={styles.mainPage}>
-            <Text style = {{fontSize: 18, marginLeft: 10, marginBottom: 10, marginTop: 5}}>Type your location here:</Text>
-            <TextInput style={styles.inputField} label="teste" value = {enteredText} onChangeText={text => setEnteredText(text)}
-/>
+            <Text style={{ fontSize: 18, marginLeft: 10, marginBottom: 10, marginTop: 5 }}>Type your location here:</Text>
+            <TextInput style={styles.inputField} label="teste" value={enteredText} onChangeText={text => setEnteredText(text)}
+            />
             <View style={styles.buttonPlace}>
-                <TouchableOpacity style={styles.buttons} onPress = {() => navigation.navigate('Home')}>
-                    <Text style ={{color: 'white', fontWeight: 'bold', fontSize: 15}}> Submit</Text>
+                <TouchableOpacity style={styles.buttons} onPress={submitApiCallHandler}>
+                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 15 }}> Submit</Text>
                 </TouchableOpacity>
-                <TouchableOpacity  style={styles.buttons}>
-                    
-                        <MaterialCommunityIcons  name="target" size={30} color='white' />
-                   
+                <TouchableOpacity style={styles.buttons}>
+
+                    <MaterialCommunityIcons name="target" size={30} color='white' />
+
                 </TouchableOpacity>
 
             </View>
@@ -64,5 +78,5 @@ const styles = StyleSheet.create({
         padding: 10,
 
     }
-    
+
 })
