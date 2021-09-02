@@ -8,19 +8,43 @@ import axios from 'axios';
 const API = 'https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&';
 const { PRIMARY_COLOR } = colors;
 import * as Location from 'expo-location';
+import { useSelector, useDispatch } from 'react-redux';
+import { searchActions } from '../store/SearchSlice';
+import PreviusSearches from '../components/PreviusSearches';
 
 export default function SearchWeather({ navigation }) {
+    const search = useSelector(state => state.search);
+    const dispatch = useDispatch();
+    console.log('Search', search.map(t => t));
+    const [hasError, setHasError] = useState('');
+
     const [enteredText, setEnteredText] = useState('');
     const submitApiCallHandler = () => {
         console.log('VALUE', enteredText);
         axios.get(`${API}q=${enteredText}`).then(response => {
-            console.log(response.data.results[0].geometry, response.data.results[0].components);
-            const { lat, lng } = response.data.results[0].geometry
+            setHasError('');
+            const { lat, lng } = response.data.results[0].geometry;
+            const { city, country, state_code } = response.data.results[0].components;
+            let state = state_code;
+            const { town } = response.data.results[0].components;
+            const { village } = response.data.results[0].components;
+            if (country !== 'Brazil') {
+                state = '';
+            }
+            const valueCity = city === undefined ? town : city;
+            const isVilage = valueCity === undefined ? village : valueCity;
+            const data = { city: isVilage, country, state_code: state, latitude: lat, longitude: lng };
+            // console.log('Data', city, country, state_code);
+
+            dispatch(searchActions.addSearch(data));
             navigation.navigate('Home', {
                 latitude: lat,
                 longitude: lng
             })
-        }).catch(err => console.log(err.message));
+        }).catch(err => {
+            setHasError('Sommeting went wrong, verify your text input');
+            console.log(err.message)
+        });
     }
     const submitCurrentLocationHandler = async () => {
         try {
@@ -30,37 +54,59 @@ export default function SearchWeather({ navigation }) {
             if (status !== 'granted') {
                 throw new Error('Acess to location is needed to run the app');
             }
-
+            setHasError('');
             const location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.High
             });
-            console.log(location);
+            console.log('locationnn', location);
             const { latitude, longitude } = location.coords;
             navigation.navigate('Home', {
                 latitude,
                 longitude
             })
         }
-        catch(err){
+        catch (err) {
+            setHasError(err.message)
             console.log(err.message);
-        } 
+        }
+    }
+    const getPreviusSearchWeatherHandler = (element) => {
+        navigation.navigate('Home', {
+            latitude: element.latitude,
+            longitude: element.longitude
+        })
     }
     return (
-        <View style={styles.mainPage}>
-            <Text style={{ fontSize: 18, marginLeft: 10, marginBottom: 10, marginTop: 5 }}>Type your location here:</Text>
-            <TextInput style={styles.inputField} label="teste" value={enteredText} onChangeText={text => setEnteredText(text)}
-            />
-            <View style={styles.buttonPlace}>
-                <TouchableOpacity style={styles.buttons} onPress={submitApiCallHandler}>
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 15 }}> Submit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress = {submitCurrentLocationHandler} style={styles.buttons}>
+        <View>
+            <View style={styles.mainPage}>
+                <Text style={{ fontSize: 18, marginLeft: 10, marginBottom: 10, marginTop: 5 }}>Type your location here:</Text>
+                <TextInput style={styles.inputField} label="teste" value={enteredText} onChangeText={text => setEnteredText(text)}
+                />
+                <View style={styles.buttonPlace}>
+                    <TouchableOpacity style={styles.buttons} onPress={submitApiCallHandler}>
+                        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 15 }}> Submit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={submitCurrentLocationHandler} style={styles.buttons}>
 
-                    <MaterialCommunityIcons name="target" size={30} color='white' />
+                        <MaterialCommunityIcons name="target" size={30} color='white' />
 
-                </TouchableOpacity>
+                    </TouchableOpacity>
 
+                </View>
+                <View style={{ width: '100%', height: '100%' }}>
+                    {hasError.length > 0 && <Text style={{ position: 'absolute', top: 75, left: 50, fontSize: 20, fontWeight: 'bold' }}>{hasError}</Text>}
+
+                    {hasError.length === 0 && search.length > 0 && <Text style={styles.previusTitle}>Previous Searches</Text>}
+                    {hasError.length === 0 && search.length > 0 ? (
+                        search.map(s => {
+                            console.log('S', s);
+                            return (<PreviusSearches key={Math.random().toString()} city={s.city} country={s.country} state_code={s.state_code} execute={getPreviusSearchWeatherHandler.bind(null, s)} />)
+                        }))
+                        : <Text style={{ position: 'absolute', top: 75, left: 50, fontSize: 20, fontWeight: 'bold' }}>No previus search was foundded</Text>
+                    }
+                </View>
             </View>
+
         </View>
     )
 }
@@ -99,6 +145,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
         padding: 10,
+
+    },
+    previusTitle: {
+        marginLeft: 10,
+        marginTop: 10,
+        fontWeight: 'bold',
+        fontSize: 20,
 
     }
 
