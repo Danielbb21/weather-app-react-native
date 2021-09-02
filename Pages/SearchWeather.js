@@ -7,7 +7,7 @@ import { colors } from '../utils/index';
 import axios from 'axios';
 const API = 'https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&';
 const { PRIMARY_COLOR } = colors;
-
+import * as Location from 'expo-location';
 
 export default function SearchWeather({ navigation }) {
     const [enteredText, setEnteredText] = useState('');
@@ -15,12 +15,35 @@ export default function SearchWeather({ navigation }) {
         console.log('VALUE', enteredText);
         axios.get(`${API}q=${enteredText}`).then(response => {
             console.log(response.data.results[0].geometry, response.data.results[0].components);
-            const {lat, lng }= response.data.results[0].geometry
+            const { lat, lng } = response.data.results[0].geometry
             navigation.navigate('Home', {
-               latitude: lat,
-               longitude: lng
+                latitude: lat,
+                longitude: lng
             })
         }).catch(err => console.log(err.message));
+    }
+    const submitCurrentLocationHandler = async () => {
+        try {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            console.log(status);
+
+            if (status !== 'granted') {
+                throw new Error('Acess to location is needed to run the app');
+            }
+
+            const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High
+            });
+            console.log(location);
+            const { latitude, longitude } = location.coords;
+            navigation.navigate('Home', {
+                latitude,
+                longitude
+            })
+        }
+        catch(err){
+            console.log(err.message);
+        } 
     }
     return (
         <View style={styles.mainPage}>
@@ -31,7 +54,7 @@ export default function SearchWeather({ navigation }) {
                 <TouchableOpacity style={styles.buttons} onPress={submitApiCallHandler}>
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 15 }}> Submit</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttons}>
+                <TouchableOpacity onPress = {submitCurrentLocationHandler} style={styles.buttons}>
 
                     <MaterialCommunityIcons name="target" size={30} color='white' />
 
