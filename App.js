@@ -14,6 +14,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SearchWeather from './Pages/SearchWeather';
 import Home from './Pages/Home';
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -91,8 +93,9 @@ export default function App() {
     const Stack = createNativeStackNavigator();
     const Tab = createBottomTabNavigator();
     return (
-      <NavigationContainer >
-        {/* <View style={styles.container}>
+      <Provider store={store}>
+        <NavigationContainer >
+          {/* <View style={styles.container}>
           <StatusBar style="auto" />
 
           <View style={styles.main}>
@@ -104,30 +107,31 @@ export default function App() {
 
 
         </View> */}
-        <Tab.Navigator screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
+          <Tab.Navigator screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
 
-            if (route.name === 'Home') {
-              iconName = focused
-                ? 'home'
-                : 'home';
+              if (route.name === 'Home') {
+                iconName = focused
+                  ? 'home'
+                  : 'home';
 
-            } else if (route.name === 'Search') {
-              iconName = focused ? 'search' : 'search';
-            }
+              } else if (route.name === 'Search') {
+                iconName = focused ? 'search' : 'search';
+              }
 
-            // You can return any component that you like here!
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: 'tomato',
-          tabBarInactiveTintColor: 'gray',
-        })}>
-          <Tab.Screen name="Search" component={SearchWeather} />
-          <Tab.Screen name="Home" component={Home} />
+              // You can return any component that you like here!
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: 'tomato',
+            tabBarInactiveTintColor: 'gray',
+          })}>
+            <Tab.Screen name="Search" component={SearchWeather} />
+            <Tab.Screen name="Home" component={Home} />
 
-        </Tab.Navigator>
-      </NavigationContainer>
+          </Tab.Navigator>
+        </NavigationContainer>
+      </Provider>
     );
   }
   else if (errorMessage) {
