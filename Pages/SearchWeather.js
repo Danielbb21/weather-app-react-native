@@ -15,12 +15,12 @@ import PreviusSearches from '../components/PreviusSearches';
 export default function SearchWeather({ navigation }) {
     const search = useSelector(state => state.search);
     const dispatch = useDispatch();
-    console.log('Search', search.map(t => t));
-    const [hasError, setHasError] = useState('');
 
+    const [hasError, setHasError] = useState('');
+    console.log('ERR', hasError);
     const [enteredText, setEnteredText] = useState('');
     const submitApiCallHandler = () => {
-        console.log('VALUE', enteredText);
+
         axios.get(`${API}q=${enteredText}`).then(response => {
             setHasError('');
             const { lat, lng } = response.data.results[0].geometry;
@@ -34,7 +34,7 @@ export default function SearchWeather({ navigation }) {
             const valueCity = city === undefined ? town : city;
             const isVilage = valueCity === undefined ? village : valueCity;
             const data = { city: isVilage, country, state_code: state, latitude: lat, longitude: lng };
-            // console.log('Data', city, country, state_code);
+
 
             dispatch(searchActions.addSearch(data));
             navigation.navigate('Home', {
@@ -43,6 +43,7 @@ export default function SearchWeather({ navigation }) {
             })
         }).catch(err => {
             setHasError('Sommeting went wrong, verify your text input');
+            console.log('aqui');
             console.log(err.message)
         });
     }
@@ -58,7 +59,7 @@ export default function SearchWeather({ navigation }) {
             const location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.High
             });
-            console.log('locationnn', location);
+
             const { latitude, longitude } = location.coords;
             navigation.navigate('Home', {
                 latitude,
@@ -67,6 +68,7 @@ export default function SearchWeather({ navigation }) {
         }
         catch (err) {
             setHasError(err.message)
+            console.log('aqui');
             console.log(err.message);
         }
     }
@@ -94,16 +96,17 @@ export default function SearchWeather({ navigation }) {
 
                 </View>
                 <View style={{ width: '100%', height: '100%' }}>
-                    {hasError.length > 0 && <Text style={{ position: 'absolute', top: 75, left: 50, fontSize: 20, fontWeight: 'bold' }}>{hasError}</Text>}
+                    {hasError.length > 0 && <Text style={{ position: 'absolute', top: 75, left: 20, fontSize: 20, fontWeight: 'bold' }}>{hasError}</Text>}
 
-                    {hasError.length === 0 && search.length > 0 && <Text style={styles.previusTitle}>Previous Searches</Text>}
-                    {hasError.length === 0 && search.length > 0 ? (
+                    {hasError === '' && search.length > 0 && <Text style={styles.previusTitle}>Previous Searches</Text>}
+                    {hasError === '' && search.length > 0 && (
                         search.map(s => {
-                            console.log('S', s);
+
                             return (<PreviusSearches key={Math.random().toString()} city={s.city} country={s.country} state_code={s.state_code} execute={getPreviusSearchWeatherHandler.bind(null, s)} />)
                         }))
-                        : <Text style={{ position: 'absolute', top: 75, left: 50, fontSize: 20, fontWeight: 'bold' }}>No previus search was foundded</Text>
+
                     }
+                    { hasError.length === 0 &&  search.length === 0 && <Text style={{ position: 'absolute', top: 75, left: 50, fontSize: 20, fontWeight: 'bold' }}>No previus search was foundded</Text>}
                 </View>
             </View>
 
