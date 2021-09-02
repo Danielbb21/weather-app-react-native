@@ -13,8 +13,8 @@ const searchSlice = createSlice({
     reducers: {
         addSearch(state, action) {
             const newSearch = action.payload;
-            console.log('NEW SEARCH', newSearch);
-            console.log('state', state);
+            
+            
             if (state.length < 3) {
                 state.unshift(newSearch);
             }

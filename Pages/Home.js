@@ -18,8 +18,7 @@ export default function Home({ route, mavigation }) {
     if (route.params) {
         latitude = route.params.latitude;
         longitude = route.params.longitude;
-        console.log('Latitude', latitude);
-        console.log('Longitude', longitude);
+    
     }
     async function load() {
         setCurrentWheater(null);
@@ -47,7 +46,7 @@ export default function Home({ route, mavigation }) {
             const response = await fetch(weather_url);
 
             const data = await response.json();
-            console.log('DATA', data);
+            
             if (response.ok) {
                 setCurrentWheater(data);
             }

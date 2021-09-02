@@ -5,7 +5,7 @@ const { PRIMARY_COLOR } = colors;
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function PreviusSearches({ city, country, state_code, execute }) {
-    console.log('city', city);
+    
     
     return (
         <View style={styles.component}>
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
         borderLeftColor: PRIMARY_COLOR
     },
     cityInfo: {
+        fontSize: 18,
         fontWeight: 'bold',
     },
     otherInfo: {
